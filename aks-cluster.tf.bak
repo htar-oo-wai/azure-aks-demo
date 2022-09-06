@@ -1,0 +1,44 @@
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_resource_group" "default" {
+  name     = "htarwai-demo-rg"
+  location = "Southeast Asia"
+
+  tags = {
+    environment = "Demo"
+  }
+}
+
+resource "azurerm_kubernetes_cluster" "default" {
+  name                = "htarwai-demo-aks"
+  location            = azurerm_resource_group.default.location
+  resource_group_name = azurerm_resource_group.default.name
+  dns_prefix          = "htarwai-demo-k8s"
+
+  default_node_pool {
+    name            = "default"
+    node_count      = 1
+    vm_size         = "Standard_DC2s_v3"
+    os_disk_size_gb = 30
+  }
+  addon_profile {
+    http_application_routing {
+      enabled = true
+    }
+  }
+
+  service_principal {
+    client_id     = var.appId
+    client_secret = var.password
+  }
+
+  role_based_access_control {
+    enabled = true
+  }
+
+  tags = {
+    environment = "Demo"
+  }
+}
